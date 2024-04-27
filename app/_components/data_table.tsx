@@ -10,12 +10,15 @@ import {
 } from "@/components/ui/table";
 import {
     ColumnDef,
+    RowSelectionInstance,
+    RowSelectionState,
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { DataTablePagination } from "./data-table-pagination";
+import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -28,6 +31,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        enableMultiRowSelection: true,
     });
 
     // TASK : Make first 2 columns (i.e. checkbox and task id) sticky

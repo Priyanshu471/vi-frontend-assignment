@@ -4,12 +4,35 @@ import { Badge } from "@/components/ui/badge";
 import { type ColumnDef } from "@tanstack/react-table";
 import { labels, priorities, statuses } from "../_constants/metadata";
 import { type Task } from "../_constants/schema";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const columns: Array<ColumnDef<Task>> = [
+    {
+        accessorKey: "selection",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+            />
+        ),
+        enablePinning: true,
+    },
     {
         accessorKey: "id",
         header: ({ column }) => <span>Task</span>,
         cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
+        enablePinning: true,
     },
     {
         accessorKey: "title",
@@ -26,6 +49,7 @@ export const columns: Array<ColumnDef<Task>> = [
                 </div>
             );
         },
+        enableResizing: true,
     },
     {
         accessorKey: "status",
@@ -44,6 +68,7 @@ export const columns: Array<ColumnDef<Task>> = [
                 </div>
             );
         },
+        enableResizing: true,
     },
     {
         accessorKey: "priority",
@@ -66,5 +91,6 @@ export const columns: Array<ColumnDef<Task>> = [
                 </div>
             );
         },
+        enableResizing: true,
     },
 ];
