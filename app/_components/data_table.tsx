@@ -10,15 +10,13 @@ import {
 } from "@/components/ui/table";
 import {
     ColumnDef,
-    RowSelectionInstance,
-    RowSelectionState,
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { DataTablePagination } from "./data-table-pagination";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -31,7 +29,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        enableMultiRowSelection: true,
+
+        columnResizeMode: "onChange",
     });
 
     // TASK : Make first 2 columns (i.e. checkbox and task id) sticky
@@ -40,19 +39,34 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     return (
         <div className="space-y-4">
             <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
+                <Table style={{ minWidth: table.getTotalSize() }}>
+                    <TableHeader className="group/header">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} colSpan={header.colSpan}>
+                                        <TableHead
+                                            key={header.id}
+                                            colSpan={header.colSpan}
+                                            className={cn(
+                                                `group relative group-hover/header:bg-slate-100 w-${header.getSize()}`,
+                                                header.id === "selection" &&
+                                                    "sticky left-0 bg-white z-10 ",
+                                                header.id === "id" &&
+                                                    "sticky left-12 bg-white z-10 hover:bg-slate-100 ",
+                                            )}
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
                                                       header.column.columnDef.header,
                                                       header.getContext(),
                                                   )}
+                                            <div
+                                                className="w-1 h-full absolute top-0 right-0 select-none touch-none cursor-col-resize group-hover:bg-muted-foreground/20"
+                                                onMouseDown={header.getResizeHandler()}
+                                                onTouchStart={header.getResizeHandler()}
+                                            />
                                         </TableHead>
                                     );
                                 })}
@@ -65,9 +79,21 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    className="group/row"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className={cn(
+                                                "group-hover/row:bg-slate-100",
+                                                cell.column.id === "selection" &&
+                                                    "sticky left-0 bg-white",
+                                                cell.column.id === "id" &&
+                                                    "sticky left-12 bg-white",
+                                                row.getIsSelected() && "bg-slate-100",
+                                            )}
+                                            style={{ width: cell.column.getSize() }}
+                                        >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext(),
